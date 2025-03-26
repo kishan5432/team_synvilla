@@ -57,17 +57,22 @@ export const login = async (req, res, next) => {
     }
 
     console.log("i am here")
-    generateToken(user.id, res);
+    const { token, userInfo } = generateToken(user, res);
     res.status(200).json({
+      success: true,
       message: `Welcome Back, ${user.fullName}!`,
       fullName: user.fullName,
       email: user.email,
-      
+      profilePic: user.profilePic,
+      _id: user.id,
+      userInfo
     });
   } catch (error) {
     next(error);
   }
 };
+
+
 
 // Logout ----------------------------------------------------------------------------------------------------
 export const logout = (req, res, next) => {

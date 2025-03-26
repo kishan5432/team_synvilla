@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import bgImage from "../assets/contact.jpg" // ✅ Importing the background image
+import Footer from "../components/Footer";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -32,6 +33,7 @@ export default function Contact() {
   };
 
   return (
+    <div>
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -105,5 +107,8 @@ export default function Contact() {
         </motion.form>
       </motion.div>
     </motion.div>
+    <Footer/>
+    
+    </div>
   );
 }

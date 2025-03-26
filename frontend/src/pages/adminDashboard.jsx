@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,9 +9,13 @@ import {
   FiMail,
   FiSearch,
   FiShoppingCart,
+  FiMenu,
+  FiX,
+  FiLogOut,
 } from "react-icons/fi";
 import Chart from "react-apexcharts";
 import ManageProducts from "./ManageProduct";
+import AddProduct from "./AddProduct";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -21,11 +24,27 @@ const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
     fetchUsers();
     fetchContacts();
     fetchProducts();
+
+    // Check screen size
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkScreenSize();
+
+    // Add event listener
+    window.addEventListener("resize", checkScreenSize);
+
+    // Cleanup event listener
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
   const fetchUsers = async () => {
@@ -53,14 +72,26 @@ const AdminDashboard = () => {
       });
       setProducts(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
-      console.error("Error fetching products:", error.response?.data || error.message);
+      console.error(
+        "Error fetching products:",
+        error.response?.data || error.message
+      );
     }
+  };
+
+  const handleLogout = () => {
+    // Clear any authentication tokens
+    localStorage.removeItem("token");
+    // Redirect to home page
+    navigate("/");
   };
 
   const filteredUsers = users.filter(
     (user) =>
-      (user.name && user.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase()))
+      (user.name &&
+        user.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (user.email &&
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const salesData = {
@@ -71,39 +102,97 @@ const AdminDashboard = () => {
     series: [{ name: "Sales", data: [30, 40, 45, 50, 49, 60] }],
   };
 
+  const SidebarContent = () => (
+    <motion.aside
+      className={`w-64 bg-white shadow-lg p-5 flex flex-col items-center rounded-r-2xl 
+      ${isSmallScreen ? "fixed inset-y-0 left-0 z-50" : "block"}
+      ${isSmallScreen && !isSidebarOpen ? "-translate-x-full" : "translate-x-0"}
+      transition-transform duration-300 ease-in-out`}
+    >
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Admin Panel</h2>
+        {isSmallScreen && (
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="text-gray-600 hover:text-gray-900"
+          >
+            <FiX size={24} />
+          </button>
+        )}
+      </div>
+      <div className="space-y-4 w-full">
+        {[
+          { name: "Dashboard", icon: <FiBox />, tab: "dashboard" },
+          { name: "Add Product", icon: <FiPlusCircle />, tab: "add-product" },
+          { name: "Manage Products", icon: <FiBox />, tab: "products" },
+          { name: "View Users", icon: <FiUsers />, tab: "users" },
+          { name: "Contact Messages", icon: <FiMail />, tab: "contacts" },
+        ].map(({ name, icon, tab }) => (
+          <button
+            key={tab}
+            className={`w-full flex items-center space-x-3 py-3 px-5 rounded-lg text-lg ${
+              activeTab === tab
+                ? "bg-[#A0522D] text-white"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
+            onClick={() => {
+              setActiveTab(tab);
+              if (isSmallScreen) setIsSidebarOpen(false);
+            }}
+          >
+            {icon} <span>{name}</span>
+          </button>
+        ))}
+      </div>
+    </motion.aside>
+  );
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <motion.aside className="w-64 bg-white shadow-lg p-5 flex flex-col items-center rounded-r-2xl">
-        <h2 className="text-2xl font-bold mb-6">Admin Panel</h2>
-        <div className="space-y-4 w-full">
-          {[
-            { name: "Dashboard", icon: <FiBox />, tab: "dashboard" },
-            { name: "Add Product", icon: <FiPlusCircle />, tab: "add-product" },
-            { name: "Manage Products", icon: <FiBox />, tab: "products" },
-            { name: "View Users", icon: <FiUsers />, tab: "users" },
-            { name: "Contact Messages", icon: <FiMail />, tab: "contacts" },
-          ].map(({ name, icon, tab }) => (
-            <button
-              key={tab}
-              className={`w-full flex items-center space-x-3 py-3 px-5 rounded-lg text-lg ${
-                activeTab === tab ? "bg-[#A0522D] text-white" : "bg-gray-200 hover:bg-gray-300"
-              }`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {icon} <span>{name}</span>
-            </button>
-          ))}
+      {/* Mobile Header */}
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-white shadow-md z-40 flex justify-between items-center p-4">
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="text-gray-600 hover:text-gray-900"
+        >
+          <FiMenu size={24} />
+        </button>
+        <h1 className="text-xl font-bold">Admin Dashboard</h1>
+        <button
+          onClick={handleLogout}
+          className="text-red-600 hover:text-red-800"
+        >
+          <FiLogOut size={24} />
+        </button>
+      </div>
+
+      {/* Desktop Sidebar */}
+      {!isSmallScreen && <SidebarContent />}
+
+      {/* Mobile Sidebar */}
+      {isSmallScreen && isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          <SidebarContent />
         </div>
-      </motion.aside>
+      )}
 
       {/* Main Content */}
-      <div className="flex-1 p-8">
+      <div className={`flex-1 p-8 ${isSmallScreen ? "mt-16" : ""}`}>
         <AnimatePresence mode="wait">
           {activeTab === "dashboard" && (
             <motion.div key="dashboard">
-              <h1 className="text-3xl font-bold mb-4">Dashboard Overview</h1>
+              <div className="hidden md:flex justify-between items-center mb-4">
+                <h1 className="text-3xl font-bold">Dashboard Overview</h1>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                >
+                  <FiLogOut /> <span>Logout</span>
+                </button>
+              </div>
               <div className="grid grid-cols-3 gap-6 mb-6">
                 <div className="p-6 bg-white shadow-lg rounded-lg flex flex-col items-center">
                   <FiUsers size={40} className="text-blue-500" />
@@ -122,11 +211,17 @@ const AdminDashboard = () => {
                 </div>
               </div>
               <div className="p-6 bg-white shadow-lg rounded-lg">
-                <Chart options={salesData.options} series={salesData.series} type="line" height={300} />
+                <Chart
+                  options={salesData.options}
+                  series={salesData.series}
+                  type="line"
+                  height={300}
+                />
               </div>
             </motion.div>
           )}
 
+          {/* Rest of the existing content remains the same */}
           {activeTab === "users" && (
             <motion.div key="users">
               <h1 className="text-3xl font-bold mb-4">User List</h1>
@@ -151,7 +246,9 @@ const AdminDashboard = () => {
                   {filteredUsers.map((user) => (
                     <tr key={user._id} className="border-b">
                       <td className="p-3">{user.email}</td>
-                      <td className="p-3">{new Date(user.createdAt).toLocaleDateString()}</td>
+                      <td className="p-3">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -159,30 +256,33 @@ const AdminDashboard = () => {
             </motion.div>
           )}
 
- {activeTab === "contacts" && (
-             <motion.div key="contacts">
-               <h1 className="text-3xl font-bold mb-4">Contact Messages</h1>
-               <table className="w-full bg-white shadow-lg rounded-lg p-4">
-                 <thead>
-                   <tr className="bg-gray-200">
-                    
-                     <th className="p-3 text-left">Email</th>
-                     <th className="p-3 text-left">Message</th>
-                   </tr>
-                 </thead>
-                 <tbody>
-                   {contacts.map((contact) => (
-                     <tr key={contact._id} className="border-b">
-                      
-                       <td className="p-3">{contact.email}</td>
-                       <td className="p-3">{contact.message}</td>
-                     </tr>
-                   ))}
-                 </tbody>
-               </table>
-             </motion.div>
-           )}
-          {activeTab === "add-product" && navigate("/add-product")}
+          {activeTab === "contacts" && (
+            <motion.div key="contacts">
+              <h1 className="text-3xl font-bold mb-4">Contact Messages</h1>
+              <table className="w-full bg-white shadow-lg rounded-lg p-4">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="p-3 text-left">Email</th>
+                    <th className="p-3 text-left">Message</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {contacts.map((contact) => (
+                    <tr key={contact._id} className="border-b">
+                      <td className="p-3">{contact.email}</td>
+                      <td className="p-3">{contact.message}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </motion.div>
+          )}
+
+          {activeTab === "add-product" && (
+            <motion.div key="add-product">
+              <AddProduct />
+            </motion.div>
+          )}
 
           {activeTab === "products" && <ManageProducts />}
         </AnimatePresence>

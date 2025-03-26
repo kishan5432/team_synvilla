@@ -15,7 +15,7 @@ import {
 import adminMiddleware from "../middleware/admin.middleware.js";
 import { TokenGuard } from "../middleware/auth.middleware.js";
 import { createContact } from "../controllers/admin.controller.js";
-
+import upload from "../middleware/product-image.js";
 
 const router = express.Router();
 
@@ -23,39 +23,35 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 🔹 Multer Setup for Image Uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../uploads/"));
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
-const upload = multer({ storage });
-
-// ✅ Admin Routes
+//  Admin Routes
 router.post("/signup", adminSignup);
 router.post("/login", adminLogin);
 
-// ✅ Product Routes
-router.post(
-  "/productAdd",
-  TokenGuard,
-  adminMiddleware,
-  upload.single("image"),
-  addProduct
-);
+//  Product Routes
+router.post("/productAdd", TokenGuard, adminMiddleware,  multer().none(), 
+    addProduct);
 router.put(
   "/productManage/:id",
   TokenGuard,
   adminMiddleware,
-  upload.single("image"),
+  multer().none(),
   updateProduct
 );
 router.delete("/productDelete/:id", TokenGuard, adminMiddleware, deleteProduct);
 router.get("/products", TokenGuard, adminMiddleware, fetchProducts);
- router.route('/users').get(getAllUsers);
- router.route("/contacts").get(getAllContacts).post(createContact); // Add POST method
- 
+router.route("/users").get(getAllUsers);
+router.route("/contacts").get(getAllContacts).post(createContact); // Add POST method
+
+router.post(
+  "/upload-product-image",
+  upload.single("productImage"),
+  (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    res.status(200).json({ imageUrl: req.file.path });
+  }
+);
+
 export default router;

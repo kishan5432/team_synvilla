@@ -18,17 +18,32 @@ const LoginPage = () => {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5002/api/auth/login", formData, {
-        withCredentials: true, // Ensure cookies are sent
-      });
+      const res = await axios.post(
+        "http://localhost:5002/api/auth/login",
+        formData,
+        {
+          withCredentials: true, // Ensure cookies are sent
+        }
+      );
+      if (res.data.success) {
+        const localData = {
+          _id: res.data.userInfo._id,
+          fullName: res.data.fullName,
+          email: res.data.email,
+          profilePic: res.data.profilePic,
+        };
 
-      alert(res.data.message); // Show welcome message
-      navigate("/"); // Redirect to Home page
+        localStorage.setItem("user", JSON.stringify(localData));
+
+        // Dispatch custom event
+        window.dispatchEvent(new Event("userStateChanged"));
+        alert(res.data.message); // Show welcome message
+        navigate("/"); // Redirect to home page
+      }
     } catch (err) {
       setError(err.response?.data?.error || "Something went wrong");
     }
   };
-
   return (
     <div className="min-h-[75%] flex items-center justify-center p-6">
       <motion.div
@@ -79,15 +94,18 @@ const LoginPage = () => {
         </form>
 
         <p className="text-center text-[#5c4033] mt-4">
-          Don't have an account? {" "}
+          Don't have an account?{" "}
           <Link to="/signup" className="text-[#d2a679] hover:underline">
             Sign Up
           </Link>
         </p>
 
         <p className="text-center text-[#5c4033] mt-4">
-          Forgot your password? {" "}
-          <Link to="/forgot-password" className="text-[#d2a679] hover:underline">
+          Forgot your password?{" "}
+          <Link
+            to="/forgot-password"
+            className="text-[#d2a679] hover:underline"
+          >
             Reset Password
           </Link>
         </p>

@@ -1,11 +1,12 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import path from "path";
 import Product from "../models/product.model.js";
 import Admin from "../models/Admin.model.js";
 import User from "../models/user.model.js";
-import admiRoute from "../routes/admin.routes.js"
 import Contact from "../models/Contact.model.js"
+
+
+
 
 //  Admin Signup
 export const adminSignup = async (req, res, next) => {
@@ -65,15 +66,23 @@ export const adminLogin = async (req, res, next) => {
 
 // Add Product
 export const addProduct = async (req, res, next) => {
+ 
   try {
-    const { name, description, price, category, isNewArrival } = req.body;
-    if (!name || !description || !price || !category) {
+
+    console.log('Full Request Body:', req.body);
+    console.log('Full Request Files:', req.files);
+    console.log('Request Headers:', req.headers);
+  
+   
+
+
+    const { name, description, price, category, isNewArrival, image } = req.body;
+  
+    if (!name || !description || !price || !category || !image) {
       const error = new Error("All Fields Are Required!");
       error.statusCode = 400;
       throw error;
     }
-
-    const image = req.file ? `/uploads/${req.file.filename}` : null; // ✅ Ensure correct path
     const product = new Product({
       name,
       description,
@@ -82,13 +91,17 @@ export const addProduct = async (req, res, next) => {
       isNewArrival,
       image,
     });
+
     await product.save();
 
-    res.status(201).json({ message: "Product Added Successfully!", product });
+    res.status(201).json({ message: "Product Added Successfully!" });
   } catch (error) {
     next(error);
   }
 };
+
+
+
 
 // Update Product
 export const updateProduct = async (req, res, next) => {
@@ -137,15 +150,9 @@ export const deleteProduct = async (req, res, next) => {
 export const fetchProducts = async (req, res) => {
   try {
     const products = await Product.find();
-    // ✅ Ensure correct image URL before sending response
-    const updatedProducts = products.map((product) => ({
-      ...product._doc,
-      image: product.image
-        ? `http://localhost:${process.env.PORT||5000}${product.image}`
-        : null, //  Fixed Image URL
-    }));
 
-    res.status(200).json(updatedProducts);
+
+    res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Error fetching products", error });
   }

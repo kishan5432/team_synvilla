@@ -13,7 +13,12 @@ import homeVisitImg from "../assets/homevisit.webp";
 import touchFeelImg from "../assets/feel.webp";
 import consultationImg from "../assets/free.webp";
 import bannerImage from "../assets/bannerone.webp";
+import livingAreaImg from "../assets/coffeetable.jpg";
+import bedroomImg from "../assets/coffeetable.jpg";
+import newArrivalImg from "../assets/coffeetable.jpg";
+import gardenImg from "../assets/coffeetable.jpg";
 import Footer from "../components/Footer";
+
 
 const HeroSection = () => {
   const bgRef = useRef(null);
@@ -127,12 +132,14 @@ const HeroSection = () => {
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 text-gray-800">
           Explore Our <span className="text-gray-500">Categories</span>
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 px-6 justify-center">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 px-6 justify-center">
           {[
-            { name: "Living Area", desc: "Transform your living space with stylish & comfortable furniture." },
-            { name: "Garden Area", desc: "Bring elegance to your outdoor spaces with our premium garden collection." },
-            { name: "Bedroom", desc: "Upgrade your bedroom with cozy, modern, and elegant designs." },
-            { name: "New Arrivals", desc: "Check out the latest trends in furniture and home décor." }
+            { img: livingAreaImg , title: "Living Area", desc: "Transform your living space with stylish & comfortable furniture." },
+            { img: gardenImg ,title: "Garden Area", desc: "Bring elegance to your outdoor spaces with our premium garden collection." },
+            { img: bedroomImg ,title: "Bedroom", desc: "Upgrade your bedroom with cozy, modern, and elegant designs." },
+            { img: newArrivalImg, title: "New Arrivals", desc: "Check out the latest trends in furniture and home décor." }
+
+            
           ].map((category, index) => (
             <motion.div
               key={index}
@@ -147,8 +154,27 @@ const HeroSection = () => {
               <p className="text-gray-600 mt-2 text-sm">{category.desc}</p>
             </motion.div>
           ))}
+        </div>*/}
+      </motion.div> 
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 px-6 justify-center">
+           {[{ img: homeVisitImg, title: "Home Visits", desc: "Experience our furniture in your own home before buying." },
+            { img: touchFeelImg, title: "Touch & Feel", desc: "Feel the quality and comfort of our materials." },
+            { img: consultationImg, title: "Free Consultation", desc: "Get expert advice for the perfect fit for your space." },
+            { img: consultationImg, title: "Free Consultation", desc: "Get expert advice for the perfect fit for your space." }]
+            .map((reason, index) => (
+              <div key={index} className="p-6  rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                <img src={reason.img} alt={reason.title} className="w-100 h-80 object-contain rounded-lg" />
+                <h3 className="text-xl font-semibold text-gray-800 mt-4 text-center">
+  {reason.title}
+</h3>
+<p className="text-gray-600 mt-2 text-sm text-center">
+  {reason.desc}
+</p>
+
+              </div>
+          ))}
         </div>
-      </motion.div>
 
       <div className="w-full py-16 bg-white">
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 text-gray-800">

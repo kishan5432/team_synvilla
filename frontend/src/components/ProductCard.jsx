@@ -1,7 +1,9 @@
+import axios from "axios";
 import React, { useMemo } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 
 const ProductCard = ({ products }) => {
+  console.log(products);
   const navigate = useNavigate();
 
   const getCategoryName = (code) => {
@@ -23,14 +25,26 @@ const ProductCard = ({ products }) => {
   };
 
   // ✅ Handle adding item to cart & navigating to CartPage
-  const handleAddToCart = (product) => {
+  const handleAddToCart = async (product) => {
     if (product) {
-      const encodedProduct = encodeURIComponent(JSON.stringify([product])); // Convert product to URL-safe format
-      navigate(`/cart/${encodedProduct}`);
+      const response = await axios.post(
+        "http://localhost:5002/api/cart/add",
+        product,
+        {
+          withCredentials: true,
+        }
+      );
+      if (response.status === 200) {
+        alert("item added to cart");
+      } else {
+        alert("oops! some error occured");
+      }
+      // navigate(`/cart/${encodedProduct}`);
     }
   };
 
   const shuffledProducts = useMemo(() => shuffleArray(products), [products]);
+  console.log(products);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -45,9 +59,10 @@ const ProductCard = ({ products }) => {
           <p className="text-gray-600">{getCategoryName(product.category)}</p>
           <p className="text-green-600 font-semibold">₹{product.price}</p>
 
-          <button 
-            onClick={() => handleAddToCart(product)} 
-            className="mt-2 w-full bg-[#87421f] text-white py-2 rounded-lg hover:bg-[#978d89]">
+          <button
+            onClick={() => handleAddToCart(product)}
+            className="mt-2 w-full bg-[#87421f] text-white py-2 rounded-lg hover:bg-[#978d89]"
+          >
             Add to Cart
           </button>
 

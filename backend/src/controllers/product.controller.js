@@ -14,14 +14,8 @@
         return res.status(400).json({ message: "Category parameter is required" });
       }
       const products = await Product.find({ category }).lean();
-      const updatedProducts = products.map((product) => ({
-        ...product,
-        image: product.image 
-          ? `http://localhost:${process.env.PORT || 5000}${product.image}` 
-          : null, // ✅ Fixed Image URL
-      }));
       
-      res.json(updatedProducts);
+      res.json(products);
     } catch (error) {
       handleError(res, error);
     }
@@ -31,14 +25,8 @@
   export const getNewProducts = async (req, res) => {
     try {
       const products = await Product.find({ isNewArrival: true }).lean();
-      const updatedProducts = products.map((product) => ({
-        ...product,
-        image: product.image 
-          ? `http://localhost:${process.env.PORT || 5000}${product.image}` 
-          : null, // ✅ Fixed Image URL
-      }));
-      
-      res.json(updatedProducts);
+
+      res.json(products);
     } catch (error) {
       handleError(res, error);
     }
@@ -52,11 +40,6 @@
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
-      // ✅ Modify the product object directly
-      product.image = product.image 
-      ? `http://localhost:${process.env.PORT || 5000}${product.image}` 
-      : null;
-
     res.json(product);
     } catch (error) {
       handleError(res, error, "Invalid product ID");

@@ -1,100 +1,68 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../api/axios";
 import { motion } from "framer-motion";
-import bgImage from "../assets/otp.jpg"; // ✅ Background Image Import
+import bgImage from "../assets/otp.jpg";
 
-export default function OTPVerificationPage() {
+const OtpVerification = () => {
   const [otp, setOtp] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [status, setStatus] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const email = localStorage.getItem("resetEmail");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  if (!email) {
+    return <p className="text-center text-red-500 mt-10">No email found! Please try again.</p>;
+  }
+
+  const handleVerifyOTP = async () => {
     setLoading(true);
-
-    //  Simulated OTP verification
-    const savedEmail = localStorage.getItem("resetEmail");
-    if (!savedEmail) {
-      setStatus("Session expired. Please request OTP again.");
-      setLoading(false);
-      return;
+    try {
+      await axios.post("http://localhost:5002/api/otp/verify-otp", { email, otp }, { withCredentials: true });
+      navigate("/reset-password");
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Invalid OTP");
     }
-
-    setTimeout(() => {
-      setStatus("OTP Verified! Password reset successful.");
-      setLoading(false);
-      localStorage.removeItem("resetEmail");
-      navigate("/login"); // ✅ Redirect to Login
-    }, 1500);
+    setLoading(false);
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-      className="relative flex items-center justify-end min-h-screen px-8"
-      style={{ backgroundImage: `url(${bgImage})`, backgroundSize: "cover", backgroundPosition: "center" }}
+    <div 
+      className="fixed inset-0 flex items-center justify-end bg-cover bg-center p-10" 
+      style={{ backgroundImage: `url(${bgImage})` }}
     >
-      {/*  Semi-Transparent Overlay */}
       <div className="absolute inset-0 bg-black/50"></div>
 
-      {/*  OTP Verification Form (Right Side) */}
-      <motion.div
-        className="relative z-10 backdrop-blur-lg bg-white/20 p-8 rounded-xl shadow-lg w-full max-w-md border border-white/30 mr-10 mb-20"
-        initial={{ x: 50, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
+      <motion.div 
+        className="relative z-10 backdrop-blur-lg bg-white/10 p-8 rounded-xl shadow-lg w-full max-w-md border border-white/30 mr-10 mt-20"
+        initial={{ opacity: 0, x: 50 }} 
+        animate={{ opacity: 1, x: 0 }} 
         transition={{ duration: 0.8 }}
       >
-        <h1 className="text-4xl font-extrabold mb-6 text-white text-center drop-shadow-lg">
-          OTP Verification
-        </h1>
+        <h2 className="text-2xl font-bold text-white text-center mb-6">OTP Verification</h2>
+        {message && <p className="text-white text-center mb-2">{message}</p>}
+        
+        <input 
+          type="text" 
+          placeholder="Enter OTP" 
+          value={otp} 
+          onChange={(e) => setOtp(e.target.value)}
+          className="w-full p-3 border border-white/30 rounded-lg bg-white/10 text-white placeholder-white mb-4 focus:ring-2 focus:ring-white outline-none"
+        />
 
-        <motion.form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="otp"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            placeholder="Enter OTP"
-            required
-            className="w-full p-3 mb-4 border border-white/40 rounded-lg bg-white/30 text-white placeholder-white focus:ring-2 focus:ring-white outline-none"
-          />
-          <input
-            type="password"
-            name="newPassword"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="New Password"
-            required
-            className="w-full p-3 mb-4 border border-white/40 rounded-lg bg-white/30 text-white placeholder-white focus:ring-2 focus:ring-white outline-none"
-          />
-
-          {/* ✅ Submit Button */}
-          <motion.button
-            type="submit"
-            className="w-full bg-white/30 p-3 rounded-lg hover:bg-white/50 transition-all duration-300 font-bold text-white shadow-md"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {loading ? "Verifying..." : "Verify & Reset Password"}
-          </motion.button>
-
-          {/* ✅ Status Message */}
-          {status && (
-            <motion.p
-              className="mt-4 text-white text-center font-semibold"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              {status}
-            </motion.p>
-          )}
-        </motion.form>
+        <motion.button 
+          onClick={handleVerifyOTP} 
+          className="w-full p-3 rounded-lg text-white hover:opacity-90 transition-all duration-300"
+          style={{ backgroundColor: "#FF5733" }} 
+          whileHover={{ scale: 1.05 }} 
+          whileTap={{ scale: 0.95 }} 
+          disabled={loading}
+        >
+          {loading ? "Verifying..." : "Verify OTP"}
+        </motion.button>
       </motion.div>
-    </motion.div>
+    </div>
   );
-}
+};
+
+export default OtpVerification;
