@@ -38,7 +38,7 @@ router.put(
   updateProduct
 );
 router.delete("/productDelete/:id", TokenGuard, adminMiddleware, deleteProduct);
-router.get("/products", TokenGuard, adminMiddleware, fetchProducts);
+router.get("/products", fetchProducts);
 router.route("/users").get(getAllUsers);
 router.route("/contacts").get(getAllContacts).post(createContact); // Add POST method
 

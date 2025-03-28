@@ -37,6 +37,7 @@ const HeaderWrapper = () => {
     "/add-product",
     "/manage-products",
     "/admin/contacts",
+    "/admin-login",
   ];
 
   // Check if current path matches any no-header routes

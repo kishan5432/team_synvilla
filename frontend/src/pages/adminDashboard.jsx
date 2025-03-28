@@ -58,7 +58,9 @@ const AdminDashboard = () => {
 
   const fetchContacts = async () => {
     try {
-      const res = await axios.get("http://localhost:5002/api/admin/contacts");
+      const res = await axios.get("http://localhost:5002/api/admin/contacts", {
+        withCredentials: true,
+      });
       setContacts(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
       console.error("Error fetching contacts:", error);
@@ -67,10 +69,9 @@ const AdminDashboard = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5002/api/admin/products", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      const res = await axios.get("http://localhost:5002/api/admin/products");
       setProducts(Array.isArray(res.data) ? res.data : []);
+      console.log(res.data);
     } catch (error) {
       console.error(
         "Error fetching products:",

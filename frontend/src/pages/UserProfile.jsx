@@ -15,7 +15,7 @@ const UserProfile = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          "http://localhost:5002/api/users/profile",
+          `http://localhost:5002/api/users/profile`,
           {
             withCredentials: true,
           }
@@ -199,7 +199,7 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 };
